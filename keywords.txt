@@ -1,0 +1,2 @@
+TeensyCNCCore	KEYWORD1
+operate KEYWORD2
