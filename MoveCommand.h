@@ -8,12 +8,6 @@ struct MoveCommand {
   float SpeedY;
   long Z;
   float SpeedZ;
-  long A;
-  float SpeedA;
-  long B;
-  float SpeedB;
-  long C;
-  float SpeedC;
 };
 
 #endif

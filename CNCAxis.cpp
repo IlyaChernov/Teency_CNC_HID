@@ -13,12 +13,12 @@ CNCAxis::CNCAxis(int encoderPinA, int encoderPinB, int pinDir, int pinStep, int 
 
 long CNCAxis::GetPosition(AccelStepper * _stepper)
 {
-  #ifdef useEncoders
-    return  _encoder->read();
-  #else
-    return _stepper->currentPosition();
-  #endif
-  }
+#ifdef useEncoders
+  return  _encoder->read();
+#else
+  return _stepper->currentPosition();
+#endif
+}
 
 void CNCAxis::StepForward(AccelStepper * _stepper)
 {
@@ -28,9 +28,9 @@ void CNCAxis::StepForward(AccelStepper * _stepper)
     digitalWrite(_pinStep, HIGH);
     delayMicroseconds(_stepper->getMinPulseWidth());
     digitalWrite(_pinStep, LOW);
-    #ifndef useEncoders
-    _stepper->setCurrentPosition(_stepper->currentPosition()+1);
-    #endif
+#ifndef useEncoders
+    _stepper->setCurrentPosition(_stepper->currentPosition() + 1);
+#endif
   }
 }
 
@@ -42,8 +42,8 @@ void CNCAxis::StepBackward(AccelStepper * _stepper)
     digitalWrite(_pinStep, HIGH);
     delayMicroseconds(_stepper->getMinPulseWidth());
     digitalWrite(_pinStep, LOW);
-    #ifndef useEncoders
-    _stepper->setCurrentPosition(_stepper->currentPosition()-1);
-    #endif
+#ifndef useEncoders
+    _stepper->setCurrentPosition(_stepper->currentPosition() - 1);
+#endif
   }
 }
