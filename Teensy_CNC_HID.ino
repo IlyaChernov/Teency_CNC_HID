@@ -4,8 +4,6 @@
 
 #include <AccelStepper.h>
 
-#include "ExtAccelStepper.h"
-
 #include "TeensyCNCCore.h"
 
 //#define useEncoders
