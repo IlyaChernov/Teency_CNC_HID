@@ -1,7 +1,7 @@
 #define ENCODER_USE_INTERRUPTS
 
 #include <Encoder.h>
-#include <AccelStepper.h>
+#include "AccelStepper.h"
 
 #ifndef CNCAxis_h
 #define CNCAxis_h

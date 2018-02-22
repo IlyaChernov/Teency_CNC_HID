@@ -2,7 +2,7 @@
 
 #include "MoveCommand.h"
 
-#include <AccelStepper.h>
+#include "AccelStepper.h"
 
 #include "TeensyCNCCore.h"
 
