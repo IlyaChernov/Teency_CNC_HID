@@ -10,14 +10,17 @@
 
 #define DEBUG
 
-#define xDirr 2
-#define xStep 3
+#define xEnbl 0
+#define xDirr 1
+#define xStep 2
 
-#define yDirr 7
-#define yStep 8
+#define yEnbl 3
+#define yDirr 4
+#define yStep 5
 
-#define zDirr 12
-#define zStep 24
+#define zEnbl 6
+#define zDirr 7
+#define zStep 8
 
 // Not used
 /*#define aDirr 28
