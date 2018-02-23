@@ -11,6 +11,7 @@
 //#define useEncoders
 
 #define DEBUG
+//#define DEBUGReports
 
 //pin definitions for all 3 axis
 #define xEnbl 0 //Enable pin
@@ -117,6 +118,7 @@ void receiveCommand()
 
 void processBuffer(byte* buf)
 {
+  return;
   long type =  BytesToLong(buf[0], buf[1], buf[2], buf[3]);
 
 #ifdef DEBUG

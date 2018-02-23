@@ -32,6 +32,7 @@ void TeensyCNCCore::report_state()
   buffer[startingByte++] = (global_state.cnc_status.engine_state >> 16) & 0xFF;
   buffer[startingByte++] = (global_state.cnc_status.engine_state >> 24) & 0xFF;
 
+#ifdef DEBUGReports
   Serial.print("Report Buffer Count " + String(global_state.USBCMDqueue.count()) + " | ");
   for (int i = 0; i < 64; i++) {
     if (i % 4 == 0 && i > 0)
@@ -40,7 +41,7 @@ void TeensyCNCCore::report_state()
     Serial.print(" ");
   }
   Serial.println("");
-
+#endif
   RawHID.send(buffer, 100);
 }
 
