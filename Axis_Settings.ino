@@ -1,6 +1,8 @@
-CNCAxis AxisX( 0,  1,  xDirr,  xStep,  4);
-CNCAxis AxisY( 5,  6,  yDirr,  yStep,  9);
-CNCAxis AxisZ(10, 11, zDirr, zStep, 25);
+
+
+CNCAxis AxisX( xEncA, xEncB, xDirr, xStep, xEnds);
+CNCAxis AxisY( yEncA, yEncB, yDirr, yStep, yEnds);
+CNCAxis AxisZ( zEncA, zEncB, zDirr, zStep, zEnds );
 
 long XPos()
 {

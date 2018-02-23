@@ -10,18 +10,29 @@
 
 #define DEBUG
 
+//pin definitions for all 3 axis
 #define xEnbl 0
 #define xDirr 1
 #define xStep 2
+#define xEnds 3
+#define xEncA 4
+#define xEncB 5
 
-#define yEnbl 3
-#define yDirr 4
-#define yStep 5
+#define yEnbl 7
+#define yDirr 8
+#define yStep 9
+#define yEnds 10
+#define yEncA 11
+#define yEncB 12
 
-#define zEnbl 6
-#define zDirr 7
-#define zStep 8
+#define zEnbl 24
+#define zDirr 25
+#define zStep 26
+#define zEnds 27
+#define zEncA 28
+#define zEncB 29
 
+//pin definitions for buttons start/pause/emergency
 #define s1_pin 33
 #define s2_pin 36
 #define s3_pin 39
