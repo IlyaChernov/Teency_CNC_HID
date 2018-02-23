@@ -6,7 +6,7 @@
 #define CNCGlobalState_h
 
 #include "Arduino.h"
-#include <QueueArray.h>
+#include "src/QueueArray/QueueArray.h"
 
 struct Speeds
 {
