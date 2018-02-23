@@ -28,6 +28,8 @@ long BytesToLong(byte byte0, byte byte1, byte byte2, byte byte3) {
   return dataToLong.asLong;
 }
 
+
+
 MoveCommand InterpolateLinear(long OldX, long NewX, long OldY, long NewY, long OldZ, long NewZ, float speedXYZ)
 {
   MoveCommand MC;

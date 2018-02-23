@@ -4,6 +4,8 @@
 
 #include "AccelStepper.h"
 
+#include "MultiStepper.h"
+
 #include "TeensyCNCCore.h"
 
 //#define useEncoders
@@ -11,12 +13,12 @@
 #define DEBUG
 
 //pin definitions for all 3 axis
-#define xEnbl 0
-#define xDirr 1
-#define xStep 2
-#define xEnds 3
-#define xEncA 4
-#define xEncB 5
+#define xEnbl 0 //Enable pin
+#define xDirr 1 //Direction pin
+#define xStep 2 //Step pin
+#define xEnds 3 //Endstop pin
+#define xEncA 4 //Encoder pin A
+#define xEncB 5 //Encoder pin B
 
 #define yEnbl 7
 #define yDirr 8
@@ -55,6 +57,8 @@ AccelStepper stepperY(AccelStepper::DRIVER, yStep, yDirr);
 AccelStepper stepperZ(AccelStepper::DRIVER, zStep, zDirr);
 #endif
 
+MultiStepper steppers;
+
 unsigned int msBetweenReports = 1000;
 unsigned int msBetweenReportsMoving = 50;
 
@@ -76,6 +80,10 @@ void setup() {
   stepperX.setMaxSpeed(2000);
   stepperY.setMaxSpeed(2000);
   stepperZ.setMaxSpeed(2000);
+
+  steppers.addStepper(stepperX);
+  steppers.addStepper(stepperY);
+  steppers.addStepper(stepperZ);
 }
 
 void emergency_stop() {
@@ -95,18 +103,13 @@ void receiveCommand()
 {
   int n = RawHID.recv(buffer, 0); // 0 timeout = do not wait
   if (n > 0) {
-    for (int i = 0; i < 64; i++) {
-#ifdef DEBUG
-      Serial.print(buffer[i]);
-#endif
-    }
-#ifdef DEBUG
-    Serial.println("");
-#endif
-
     cncore.global_state.USBCMDqueue.enqueue(buffer);
 
 #ifdef DEBUG
+    for (int i = 0; i < 64; i++) {
+      Serial.print(buffer[i]);
+    }
+    Serial.println("");
     Serial.println(cncore.global_state.USBCMDqueue.count());
 #endif
   }
@@ -172,8 +175,6 @@ void processBuffer(byte* buf)
                                              cncore.global_state.cnc_position.y_steps, BytesToLong(buf[12], buf[13], buf[14], buf[15]),
                                              cncore.global_state.cnc_position.z_steps, BytesToLong(buf[15], buf[17], buf[18], buf[19]),
                                              BytesToFloat(buf[20], buf[21], buf[22], buf[23]));
-
-
 
         cncore.global_state.cnc_speeds.x_speed = mcc.SpeedX;
         cncore.global_state.cnc_speeds.y_speed = mcc.SpeedY;
@@ -271,34 +272,31 @@ void loop()
     cncore.report_state();
   }
 
+  long positionsArray[] = {XPos(), YPos(), ZPos()};
+
   if (cncore.global_state.cnc_status.engine_state == engine_emergency_stopped) {
     cncore.global_state.USBCMDqueue = QueueArray <byte*>();
     cncore.global_state.ImmediateUSBCMDqueue = QueueArray <byte*>();
 
-    cncore.global_state.cnc_position.x_destination_steps = XPos();
-    cncore.global_state.cnc_position.y_destination_steps = YPos();
-    cncore.global_state.cnc_position.z_destination_steps = ZPos();
 
-    stepperX.moveTo(XPos());
-    stepperY.moveTo(YPos());
-    stepperZ.moveTo(ZPos());
+    cncore.global_state.cnc_position.setDestinations(positionsArray);
+
+    steppers.moveTo(positionsArray);
 
     return;
   }
 
-  cncore.global_state.cnc_position.x_steps = XPos();
-  cncore.global_state.cnc_position.y_steps = YPos();
-  cncore.global_state.cnc_position.z_steps = ZPos();
+  cncore.global_state.cnc_position.setPositions(positionsArray);
 
   receiveCommand();
 
-  // every msBetweenReports, send a packet to the computer
-  if ((DestinationReached() && msUntilPositionReport > msBetweenReportsMoving) || msUntilPositionReport > msBetweenReports) {
+  // every msBetweenReports, send a packet over usb
+  if ((AllDestinationsReached() && msUntilPositionReport > msBetweenReportsMoving) || msUntilPositionReport > msBetweenReports) {
     msUntilPositionReport = 0;
     cncore.report_positions();
   }
 
-  if (!cncore.global_state.USBCMDqueue.isEmpty() && !DestinationReached())
+  if (!cncore.global_state.USBCMDqueue.isEmpty() && !AllDestinationsReached())
   {
     if (cncore.global_state.cnc_status.engine_state == engine_running)
       processBuffer(cncore.global_state.USBCMDqueue.dequeue());
@@ -306,16 +304,10 @@ void loop()
       processBuffer(cncore.global_state.ImmediateUSBCMDqueue.dequeue());
   }
 
-  stepperX.runSpeedToPosition();
-  stepperY.runSpeedToPosition();
-  stepperZ.runSpeedToPosition();
-
-  //Serial.println(XPos());
-  //Serial.println(stepperX.distanceToGo());
-  //Serial.println("------------------------");
+  steppers.run();
 }
 
-bool DestinationReached()
+bool AllDestinationsReached()
 {
-  return (stepperX.distanceToGo() != 0  || stepperY.distanceToGo() != 0 || stepperZ.distanceToGo() != 0);
+  return !( stepperX.isRunning() && stepperY.isRunning() && stepperZ.isRunning() );
 }
