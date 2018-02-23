@@ -9,8 +9,10 @@
 #include "TeensyCNCCore.h"
 
 //#define useEncoders
+//#define useButtons
 
 #define DEBUG
+//#define DEBUGReports
 
 //pin definitions for all 3 axis
 #define xEnbl 0 //Enable pin
@@ -70,12 +72,14 @@ elapsedMillis msUntilStatusReport;
 void setup() {
   Serial.begin(9600);
 
+#ifdef useButtons
   pinMode(s1_pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(s1_pin), emergency_stop, FALLING );
   pinMode(s2_pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(s2_pin), pause, FALLING );
   pinMode(s3_pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(s3_pin), start_continue, FALLING );
+#endif
 
   stepperX.setMaxSpeed(2000);
   stepperY.setMaxSpeed(2000);
@@ -102,14 +106,14 @@ void start_continue() {
 void receiveCommand()
 {
   int n = RawHID.recv(buffer, 0); // 0 timeout = do not wait
+
   if (n > 0) {
     cncore.global_state.USBCMDqueue.enqueue(buffer);
 
 #ifdef DEBUG
-    for (int i = 0; i < 64; i++) {
-      Serial.print(buffer[i]);
-    }
-    Serial.println("");
+    Serial.print("Incoming cmd - ");
+    Serial.println((char*)buffer);
+    Serial.print("Queue count - ");
     Serial.println(cncore.global_state.USBCMDqueue.count());
 #endif
   }
@@ -117,6 +121,7 @@ void receiveCommand()
 
 void processBuffer(byte* buf)
 {
+  return;
   long type =  BytesToLong(buf[0], buf[1], buf[2], buf[3]);
 
 #ifdef DEBUG
