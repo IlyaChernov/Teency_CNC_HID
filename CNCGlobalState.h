@@ -51,7 +51,8 @@ struct Status
   public:
     int buffer_count;
     int line_number;
-    int engine_state;
+    //int engine_state;
+    EngineStateType engine_state;
 };
 
 class CNCGlobalState

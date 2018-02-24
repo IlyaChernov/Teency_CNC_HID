@@ -8,11 +8,16 @@
 
 #include "TeensyCNCCore.h"
 
+#include "enum.h"
+
+#include "GCodeFrameProcessor.h"
+
 //#define useEncoders
 //#define useButtons
 
-//#define DEBUG
+#define DEBUG
 //#define DEBUGReports
+#define DEBUGProcessing
 
 //pin definitions for all 3 axis
 #define xEnbl 0 //Enable pin
@@ -40,10 +45,6 @@
 #define s1_pin 33
 #define s2_pin 36
 #define s3_pin 39
-
-#define engine_running 0
-#define engine_paused 1
-#define engine_emergency_stopped 2
 
 #define axisMaxSteps 2000000000
 
@@ -91,16 +92,16 @@ void setup() {
 }
 
 void emergency_stop() {
-  cncore.global_state.cnc_status.engine_state = engine_emergency_stopped;
+  cncore.global_state.cnc_status.engine_state = EmergencyStop;
 }
 
 void pause() {
-  if ( cncore.global_state.cnc_status.engine_state == engine_running )
-    cncore.global_state.cnc_status.engine_state = engine_paused;
+  if ( cncore.global_state.cnc_status.engine_state == Running )
+    cncore.global_state.cnc_status.engine_state = Paused;
 }
 
 void start_continue() {
-  cncore.global_state.cnc_status.engine_state = engine_running;
+  cncore.global_state.cnc_status.engine_state = Running;
 }
 
 void receiveCommand()
@@ -121,6 +122,7 @@ void receiveCommand()
 
 void processBuffer(byte* buf)
 {
+  GCodeProcessor::Process((char*)buf, cncore.global_state);
   return;
   long type =  BytesToLong(buf[0], buf[1], buf[2], buf[3]);
 
@@ -272,14 +274,14 @@ void processBuffer(byte* buf)
 
 void loop()
 {
-  if (((cncore.global_state.USBCMDqueue.isEmpty() || cncore.global_state.cnc_status.engine_state != engine_running) &&  msUntilStatusReport > msBetweenReports) || msUntilStatusReport > msBetweenReports) {
+  if (((cncore.global_state.USBCMDqueue.isEmpty() || cncore.global_state.cnc_status.engine_state != Running) &&  msUntilStatusReport > msBetweenReports) || msUntilStatusReport > msBetweenReports) {
     msUntilStatusReport = 0;
     cncore.report_state();
   }
 
   long positionsArray[] = {XPos(), YPos(), ZPos()};
 
-  if (cncore.global_state.cnc_status.engine_state == engine_emergency_stopped) {
+  if (cncore.global_state.cnc_status.engine_state == EmergencyStop) {
     cncore.global_state.USBCMDqueue = QueueArray <byte*>();
     cncore.global_state.ImmediateUSBCMDqueue = QueueArray <byte*>();
 
@@ -302,7 +304,7 @@ void loop()
 
   if (!cncore.global_state.USBCMDqueue.isEmpty() && !AllDestinationsReached())
   {
-    if (cncore.global_state.cnc_status.engine_state == engine_running)
+    if (cncore.global_state.cnc_status.engine_state == Running)
       processBuffer(cncore.global_state.USBCMDqueue.dequeue());
     else
       processBuffer(cncore.global_state.ImmediateUSBCMDqueue.dequeue());

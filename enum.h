@@ -24,4 +24,12 @@ enum MetricSystemType
   MetricSystemTypeCount
 };
 
+enum EngineStateType
+{
+  Running, 
+  Paused, 
+  EmergencyStop,
+  EngineStateTypeCount
+  };
+
 #endif
