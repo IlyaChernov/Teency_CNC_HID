@@ -7,6 +7,7 @@
 
 #include "Arduino.h"
 #include "src/QueueArray/QueueArray.h"
+#include "Enum.h"
 
 struct Speeds
 {
@@ -56,6 +57,12 @@ struct Status
 class CNCGlobalState
 {
   public:
+    PositioningType curPosType;
+    CoordinateSystemType curCoordSysType;
+    MetricSystemType curMetricType;
+    
+    double PositioningSpeeds[PositioningTypeCount];
+    
     CNCGlobalState();
     Position cnc_position;
     Status cnc_status;

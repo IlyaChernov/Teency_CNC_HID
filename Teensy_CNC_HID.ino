@@ -11,7 +11,7 @@
 //#define useEncoders
 //#define useButtons
 
-#define DEBUG
+//#define DEBUG
 //#define DEBUGReports
 
 //pin definitions for all 3 axis
@@ -282,7 +282,6 @@ void loop()
   if (cncore.global_state.cnc_status.engine_state == engine_emergency_stopped) {
     cncore.global_state.USBCMDqueue = QueueArray <byte*>();
     cncore.global_state.ImmediateUSBCMDqueue = QueueArray <byte*>();
-
 
     cncore.global_state.cnc_position.setDestinations(positionsArray);
 
