@@ -2,13 +2,16 @@
 
 #include "GCodeFrameProcessor.h"
 #include "Enum.h"
+#include "src/Regexp/Regexp.h"
 
-void GCodeProcessor::Process(char* frame, CNCGlobalState &gstate) 
+void GCodeProcessor::Process(char* frame, CNCGlobalState &gstate)
 {
-  gstate.curPosType = G00;
-//#ifdef DEBUGProcessing
-    Serial.print("Processing frame - ");
-    Serial.println(frame);    
-//#endif  
-  }
+  Serial.print("Processing frame - ");
+  Serial.println(frame);
+
+  MatchState ms;
+  char buf [64];
+  ms.Target(frame);
+
+}
 

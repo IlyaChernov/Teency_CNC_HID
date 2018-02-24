@@ -116,6 +116,8 @@ void receiveCommand()
     Serial.println((char*)buffer);
     Serial.print("Queue count - ");
     Serial.println(cncore.global_state.USBCMDqueue.count());
+    Serial.print("CNC Engine State - ");
+    Serial.println(cncore.global_state.cnc_status.engine_state);
 #endif
   }
 }
@@ -123,14 +125,14 @@ void receiveCommand()
 void processBuffer(byte* buf)
 {
   GCodeProcessor::Process((char*)buf, cncore.global_state);
-  return;
-  long type =  BytesToLong(buf[0], buf[1], buf[2], buf[3]);
+  /*return;
+    long type =  BytesToLong(buf[0], buf[1], buf[2], buf[3]);
 
-#ifdef DEBUG
-  Serial.println("Executing command " + String(type));
-#endif
+    #ifdef DEBUG
+    Serial.println("Executing command " + String(type));
+    #endif
 
-  switch (type) {
+    switch (type) {
     case 256: //0x0100 immediate linear interpolation
       {
         MoveCommand mcc =  InterpolateLinear(cncore.global_state.cnc_position.x_steps, BytesToLong(buf[4], buf[5], buf[6], buf[7]),
@@ -155,7 +157,7 @@ void processBuffer(byte* buf)
         stepperZ.moveTo(cncore.global_state.cnc_position.z_destination_steps);
         stepperZ.setSpeed(mcc.SpeedZ);
 
-#ifdef DEBUG
+    #ifdef DEBUG
         Serial.println("ParameterX : " + String(BytesToLong(buf[4], buf[5], buf[6], buf[7])));
         Serial.println("ParameterY : " + String(BytesToLong(buf[8], buf[9], buf[10], buf[11])));
         Serial.println("ParameterZ : " + String(BytesToLong(buf[12], buf[13], buf[14], buf[15])));
@@ -168,7 +170,7 @@ void processBuffer(byte* buf)
         Serial.println("DestinationX : " + String(mcc.X) + " | " + String(cncore.global_state.cnc_position.x_destination_steps));
         Serial.println("DestinationY : " + String(mcc.Y) + " | " + String(cncore.global_state.cnc_position.y_destination_steps));
         Serial.println("DestinationZ : " + String(mcc.Z) + " | " + String(cncore.global_state.cnc_position.z_destination_steps));
-#endif
+    #endif
 
         cncore.report_state();
         cncore.report_speeds();
@@ -200,7 +202,7 @@ void processBuffer(byte* buf)
         stepperZ.moveTo(cncore.global_state.cnc_position.z_destination_steps);
         stepperZ.setSpeed(mcc.SpeedZ);
 
-#ifdef DEBUG
+    #ifdef DEBUG
         Serial.println("ParameterLine : " + String(BytesToLong(buf[4], buf[5], buf[6], buf[7])));
         Serial.println("ParameterX : " + String(BytesToLong(buf[8], buf[9], buf[10], buf[11])));
         Serial.println("ParameterY : " + String(BytesToLong(buf[12], buf[13], buf[14], buf[15])));
@@ -214,7 +216,7 @@ void processBuffer(byte* buf)
         Serial.println("DestinationX : " + String(mcc.X) + " | " + String(cncore.global_state.cnc_position.x_destination_steps));
         Serial.println("DestinationY : " + String(mcc.Y) + " | " + String(cncore.global_state.cnc_position.y_destination_steps));
         Serial.println("DestinationZ : " + String(mcc.Z) + " | " + String(cncore.global_state.cnc_position.z_destination_steps));
-#endif
+    #endif
 
         cncore.report_state();
         cncore.report_speeds();
@@ -269,7 +271,7 @@ void processBuffer(byte* buf)
         cncore.report_positions();
       }
       break;
-  }
+    }*/
 }
 
 void loop()
@@ -302,13 +304,10 @@ void loop()
     cncore.report_positions();
   }
 
-  if (!cncore.global_state.USBCMDqueue.isEmpty() && !AllDestinationsReached())
-  {
-    if (cncore.global_state.cnc_status.engine_state == Running)
-      processBuffer(cncore.global_state.USBCMDqueue.dequeue());
-    else
-      processBuffer(cncore.global_state.ImmediateUSBCMDqueue.dequeue());
-  }
+  if (!cncore.global_state.ImmediateUSBCMDqueue.isEmpty())
+    processBuffer(cncore.global_state.ImmediateUSBCMDqueue.dequeue());
+  else if (!cncore.global_state.USBCMDqueue.isEmpty() && AllDestinationsReached() && cncore.global_state.cnc_status.engine_state == Running)
+    processBuffer(cncore.global_state.USBCMDqueue.dequeue());
 
   steppers.run();
 }
