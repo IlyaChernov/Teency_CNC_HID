@@ -12,6 +12,8 @@ CNCGlobalState::CNCGlobalState()
 
   curPosType = G00;
 
+  cnc_speeds.movement_speed = defaultG0Speed;
+
   curCoordSysType = Absolute;
 
   curMetricType = Metric;

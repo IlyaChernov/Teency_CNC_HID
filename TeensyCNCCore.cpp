@@ -7,6 +7,7 @@
 #include "TeensyCNCCore.h"
 #include "Enum.h"
 
+#define regexSimpleGM "([GgMm]%d+)"
 #define regexSimple "(%a%-?%d+)"
 #define regexDecimal "(%a%-?%d+([.,]%d+))"
 
@@ -19,7 +20,8 @@ void TeensyCNCCore::ProcessGCodeFrame(char* frame)
   ms.Target(frame);
   unsigned long count;
 
-  count = ms.GlobalReplace (regexDecimal, ExecuteCallBack);
+  count = ms.GlobalReplace (regexSimpleGM, ExecuteCallBack); //First get base commands
+  count += ms.GlobalReplace (regexDecimal, ExecuteCallBack);
   count += ms.GlobalReplace (regexSimple, ExecuteCallBack);
 
   Serial.print ("Found ");
@@ -29,26 +31,32 @@ void TeensyCNCCore::ProcessGCodeFrame(char* frame)
 
 void TeensyCNCCore::ExecuteCode(String code)
 {
-  if (code == "g0" || code == "g00")
-  {
-    global_state.curPosType = G00;
-  }
-  else  if (code == "g1" || code == "g01")
-  {
-    global_state.curPosType = G01;
-  }
-  else if (code == "g2" || code == "g02")
-  {
-    global_state.curPosType = G02;
-  }
-  else if (code == "g3" || code == "g03")
-  {
-    global_state.curPosType = G03;
-  }
-
   Serial.print ("Executing ");
   Serial.print (code);
-  Serial.println (" code");  
+  Serial.println (" code");
+
+  if (code.startsWith("g"))
+  {
+    switch (code.remove(0, 1).toInt())
+    {
+      case 0:
+        global_state.curPosType = G00;
+        break;
+      case 1:
+        global_state.curPosType = G01;
+        break;
+      case 2:
+        global_state.curPosType = G02;
+        break;
+      case 3:
+        global_state.curPosType = G03;
+        break;
+    }    
+  }
+  else if (code.startsWith("f"))
+  {
+    global_state.PositioningSpeeds[global_state.curPosType] = 0;
+  }
 }
 
 void TeensyCNCCore::report_state()

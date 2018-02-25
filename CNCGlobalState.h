@@ -15,6 +15,7 @@ struct Speeds
     int x_speed;
     int y_speed;
     int z_speed;
+    int movement_speed;
     int spindle_speed;
 };
 
