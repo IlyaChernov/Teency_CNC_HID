@@ -5,6 +5,51 @@
 
 #include "Arduino.h"
 #include "TeensyCNCCore.h"
+#include "Enum.h"
+
+#define regexSimple "(%a%-?%d+)"
+#define regexDecimal "(%a%-?%d+([.,]%d+))"
+
+void TeensyCNCCore::ProcessGCodeFrame(char* frame)
+{
+  Serial.print("Processing frame - ");
+  Serial.println(frame);
+
+  MatchState ms;
+  ms.Target(frame);
+  unsigned long count;
+
+  count = ms.GlobalReplace (regexDecimal, ExecuteCallBack);
+  count += ms.GlobalReplace (regexSimple, ExecuteCallBack);
+
+  Serial.print ("Found ");
+  Serial.print (count);
+  Serial.println (" codes in GCode frame");
+}
+
+void TeensyCNCCore::ExecuteCode(String code)
+{
+  if (code == "g0" || code == "g00")
+  {
+    global_state.curPosType = G00;
+  }
+  else  if (code == "g1" || code == "g01")
+  {
+    global_state.curPosType = G01;
+  }
+  else if (code == "g2" || code == "g02")
+  {
+    global_state.curPosType = G02;
+  }
+  else if (code == "g3" || code == "g03")
+  {
+    global_state.curPosType = G03;
+  }
+
+  Serial.print ("Executing ");
+  Serial.print (code);
+  Serial.println (" code");  
+}
 
 void TeensyCNCCore::report_state()
 {

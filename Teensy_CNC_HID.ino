@@ -10,8 +10,6 @@
 
 #include "enum.h"
 
-#include "GCodeFrameProcessor.h"
-
 //#define useEncoders
 //#define useButtons
 
@@ -72,6 +70,7 @@ elapsedMillis msUntilStatusReport;
 
 void setup() {
   Serial.begin(9600);
+  cncore.ExecuteCallBack = ExecuteCode;
 
 #ifdef useButtons
   pinMode(s1_pin, INPUT);
@@ -122,9 +121,19 @@ void receiveCommand()
   }
 }
 
+void ExecuteCode (const char * match, const unsigned int length, char * & replacement, unsigned int & replacement_length, const MatchState & ms)
+{
+  String code = (((String)match).substring(0, length)).toLowerCase();
+
+  cncore.ExecuteCode(code);
+
+  replacement = (char *)"";
+  replacement_length = 0;
+}
+
 void processBuffer(byte* buf)
 {
-  GCodeProcessor::Process((char*)buf, cncore.global_state);
+  cncore.ProcessGCodeFrame((char*)buf);
   /*return;
     long type =  BytesToLong(buf[0], buf[1], buf[2], buf[3]);
 

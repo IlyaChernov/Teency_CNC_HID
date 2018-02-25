@@ -7,14 +7,18 @@
 
 #include "Arduino.h"
 #include "CNCGlobalState.h"
+#include "src/Regexp/Regexp.h"
 
 class TeensyCNCCore
 {
-  public:
+  public:  
     void report_state();
     void report_speeds();
     void report_positions();
     CNCGlobalState global_state;
+    void ProcessGCodeFrame(char* frame);
+    void ExecuteCode (String code);
+    GlobalReplaceCallback ExecuteCallBack;
 };
 
 #endif
