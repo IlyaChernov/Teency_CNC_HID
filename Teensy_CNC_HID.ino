@@ -134,153 +134,6 @@ void ExecuteCode (const char * match, const unsigned int length, char * & replac
 void processBuffer(byte* buf)
 {
   cncore.ProcessGCodeFrame((char*)buf);
-  /*return;
-    long type =  BytesToLong(buf[0], buf[1], buf[2], buf[3]);
-
-    #ifdef DEBUG
-    Serial.println("Executing command " + String(type));
-    #endif
-
-    switch (type) {
-    case 256: //0x0100 immediate linear interpolation
-      {
-        MoveCommand mcc =  InterpolateLinear(cncore.global_state.cnc_position.x_steps, BytesToLong(buf[4], buf[5], buf[6], buf[7]),
-                                             cncore.global_state.cnc_position.y_steps, BytesToLong(buf[8], buf[9], buf[10], buf[11]),
-                                             cncore.global_state.cnc_position.z_steps, BytesToLong(buf[12], buf[13], buf[14], buf[15]),
-                                             BytesToFloat(buf[16], buf[17], buf[18], buf[19]));
-
-        cncore.global_state.cnc_speeds.x_speed = mcc.SpeedX;
-        cncore.global_state.cnc_speeds.y_speed = mcc.SpeedY;
-        cncore.global_state.cnc_speeds.z_speed = mcc.SpeedZ;
-
-        cncore.global_state.cnc_position.x_destination_steps = mcc.X >= axisMaxSteps ? cncore.global_state.cnc_position.x_destination_steps : mcc.X;
-        cncore.global_state.cnc_position.y_destination_steps = mcc.Y >= axisMaxSteps ? cncore.global_state.cnc_position.y_destination_steps : mcc.Y;
-        cncore.global_state.cnc_position.z_destination_steps = mcc.Z >= axisMaxSteps ? cncore.global_state.cnc_position.z_destination_steps : mcc.Z;
-
-        stepperX.moveTo(cncore.global_state.cnc_position.x_destination_steps);
-        stepperX.setSpeed(mcc.SpeedX);
-
-        stepperY.moveTo(cncore.global_state.cnc_position.y_destination_steps);
-        stepperY.setSpeed(mcc.SpeedY);
-
-        stepperZ.moveTo(cncore.global_state.cnc_position.z_destination_steps);
-        stepperZ.setSpeed(mcc.SpeedZ);
-
-    #ifdef DEBUG
-        Serial.println("ParameterX : " + String(BytesToLong(buf[4], buf[5], buf[6], buf[7])));
-        Serial.println("ParameterY : " + String(BytesToLong(buf[8], buf[9], buf[10], buf[11])));
-        Serial.println("ParameterZ : " + String(BytesToLong(buf[12], buf[13], buf[14], buf[15])));
-        Serial.println("ParameterXYZ : " + String(BytesToFloat(buf[16], buf[17], buf[18], buf[31])));
-
-        Serial.println("SpeedX : " + String(mcc.SpeedX));
-        Serial.println("SpeedY : " + String(mcc.SpeedY));
-        Serial.println("SpeedZ : " + String(mcc.SpeedZ));
-
-        Serial.println("DestinationX : " + String(mcc.X) + " | " + String(cncore.global_state.cnc_position.x_destination_steps));
-        Serial.println("DestinationY : " + String(mcc.Y) + " | " + String(cncore.global_state.cnc_position.y_destination_steps));
-        Serial.println("DestinationZ : " + String(mcc.Z) + " | " + String(cncore.global_state.cnc_position.z_destination_steps));
-    #endif
-
-        cncore.report_state();
-        cncore.report_speeds();
-      }
-      break;
-    case 257: // 0x0101 linear interpolation
-      {
-        cncore.global_state.cnc_status.line_number = BytesToLong(buf[4], buf[5], buf[6], buf[7]);
-
-        MoveCommand mcc =  InterpolateLinear(cncore.global_state.cnc_position.x_steps, BytesToLong(buf[8], buf[9], buf[10], buf[11]),
-                                             cncore.global_state.cnc_position.y_steps, BytesToLong(buf[12], buf[13], buf[14], buf[15]),
-                                             cncore.global_state.cnc_position.z_steps, BytesToLong(buf[15], buf[17], buf[18], buf[19]),
-                                             BytesToFloat(buf[20], buf[21], buf[22], buf[23]));
-
-        cncore.global_state.cnc_speeds.x_speed = mcc.SpeedX;
-        cncore.global_state.cnc_speeds.y_speed = mcc.SpeedY;
-        cncore.global_state.cnc_speeds.z_speed = mcc.SpeedZ;
-
-        cncore.global_state.cnc_position.x_destination_steps = mcc.X >= axisMaxSteps ? cncore.global_state.cnc_position.x_destination_steps : mcc.X;
-        cncore.global_state.cnc_position.y_destination_steps = mcc.Y >= axisMaxSteps ? cncore.global_state.cnc_position.y_destination_steps : mcc.Y;
-        cncore.global_state.cnc_position.z_destination_steps = mcc.Z >= axisMaxSteps ? cncore.global_state.cnc_position.z_destination_steps : mcc.Z;
-
-        stepperX.moveTo(cncore.global_state.cnc_position.x_destination_steps);
-        stepperX.setSpeed(mcc.SpeedX);
-
-        stepperY.moveTo(cncore.global_state.cnc_position.y_destination_steps);
-        stepperY.setSpeed(mcc.SpeedY);
-
-        stepperZ.moveTo(cncore.global_state.cnc_position.z_destination_steps);
-        stepperZ.setSpeed(mcc.SpeedZ);
-
-    #ifdef DEBUG
-        Serial.println("ParameterLine : " + String(BytesToLong(buf[4], buf[5], buf[6], buf[7])));
-        Serial.println("ParameterX : " + String(BytesToLong(buf[8], buf[9], buf[10], buf[11])));
-        Serial.println("ParameterY : " + String(BytesToLong(buf[12], buf[13], buf[14], buf[15])));
-        Serial.println("ParameterZ : " + String(BytesToLong(buf[16], buf[17], buf[18], buf[19])));
-        Serial.println("ParameterXYZ : " + String(BytesToFloat(buf[20], buf[21], buf[22], buf[23])));
-
-        Serial.println("SpeedX : " + String(mcc.SpeedX));
-        Serial.println("SpeedY : " + String(mcc.SpeedY));
-        Serial.println("SpeedZ : " + String(mcc.SpeedZ));
-
-        Serial.println("DestinationX : " + String(mcc.X) + " | " + String(cncore.global_state.cnc_position.x_destination_steps));
-        Serial.println("DestinationY : " + String(mcc.Y) + " | " + String(cncore.global_state.cnc_position.y_destination_steps));
-        Serial.println("DestinationZ : " + String(mcc.Z) + " | " + String(cncore.global_state.cnc_position.z_destination_steps));
-    #endif
-
-        cncore.report_state();
-        cncore.report_speeds();
-      }
-      break; //linear interpolation
-    case 272: // 0x0110 set zero
-      {
-        long dimension1 =  BytesToLong(buf[8], buf[9], buf[10], buf[11]);
-
-        switch (dimension1)
-        {
-          case 1: stepperX.setCurrentPosition(0); cncore.global_state.cnc_position.x_steps = 0; break;
-          case 2: stepperY.setCurrentPosition(0); cncore.global_state.cnc_position.y_steps = 0; break;
-          case 3: stepperZ.setCurrentPosition(0); cncore.global_state.cnc_position.z_steps = 0; break;
-          case 0:
-            stepperX.setCurrentPosition(0);
-            stepperY.setCurrentPosition(0);
-            stepperZ.setCurrentPosition(0);
-
-            cncore.global_state.cnc_position.x_steps = 0;
-            cncore.global_state.cnc_position.y_steps = 0;
-            cncore.global_state.cnc_position.z_steps = 0;
-
-            break;
-        }
-
-        cncore.report_positions();
-      }
-      break;
-
-    case 273: // 0x0111 set position
-      {
-        long dimension = BytesToLong(buf[8], buf[9], buf[10], buf[11]);
-        //(long)(buf[8]  | buf[9] << 8 | buf[10] << 16 | buf[11] << 24);
-        long position = BytesToLong(buf[12], buf[13], buf[14], buf[15]);
-        //(long)(buf[12]  | buf[13] << 8 | buf[14] << 16 | buf[15] << 24);
-        switch (dimension)
-        {
-          case 1: stepperX.setCurrentPosition(position); break;
-          case 2: stepperY.setCurrentPosition(position); break;
-          case 3: stepperZ.setCurrentPosition(position); break;
-          case 0:
-            {
-              stepperX.setCurrentPosition(position);
-              stepperY.setCurrentPosition(position);
-              stepperZ.setCurrentPosition(position);
-            }
-            break;
-        }
-
-        //msUntilPositionReport = 0;
-        cncore.report_positions();
-      }
-      break;
-    }*/
 }
 
 void loop()
@@ -314,9 +167,25 @@ void loop()
   }
 
   if (!cncore.global_state.ImmediateUSBCMDqueue.isEmpty())
+  {
     processBuffer(cncore.global_state.ImmediateUSBCMDqueue.dequeue());
+    stepperX.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
+    stepperY.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
+    stepperZ.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
+    long positionsArray[] = {cncore.global_state.cnc_position.x_destination_steps, cncore.global_state.cnc_position.y_destination_steps, cncore.global_state.cnc_position.z_destination_steps};
+    steppers.moveTo(positionsArray);
+  }
   else if (!cncore.global_state.USBCMDqueue.isEmpty() && AllDestinationsReached() && cncore.global_state.cnc_status.engine_state == Running)
+  {
     processBuffer(cncore.global_state.USBCMDqueue.dequeue());
+    stepperX.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
+    stepperY.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
+    stepperZ.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
+    long positionsArray[] = {cncore.global_state.cnc_position.x_destination_steps, cncore.global_state.cnc_position.y_destination_steps, cncore.global_state.cnc_position.z_destination_steps};
+    steppers.moveTo(positionsArray);
+  }
+
+
 
   steppers.run();
 }

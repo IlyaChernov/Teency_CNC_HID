@@ -9,12 +9,21 @@
 #include "src/QueueArray/QueueArray.h"
 #include "Enum.h"
 
+struct Destination
+{
+  public :
+    int movement_speed;
+    int x_destination_steps;
+    int y_destination_steps;
+    int z_destination_steps;
+};
+
 struct Speeds
 {
   public:
-    int x_speed;
-    int y_speed;
-    int z_speed;
+    //int x_speed;
+    //int y_speed;
+    //int z_speed;
     int movement_speed;
     int spindle_speed;
 };
@@ -62,15 +71,16 @@ class CNCGlobalState
     PositioningType curPosType;
     CoordinateSystemType curCoordSysType;
     MetricSystemType curMetricType;
-    
+
     double PositioningSpeeds[PositioningTypeCount];
-    
+
     CNCGlobalState();
     Position cnc_position;
     Status cnc_status;
     Speeds cnc_speeds;
     QueueArray <byte*> USBCMDqueue;
     QueueArray <byte*> ImmediateUSBCMDqueue;
+    QueueArray <Destination> Destinations;
 };
 
 #endif
