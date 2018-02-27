@@ -96,7 +96,7 @@ void TeensyCNCCore::ExecuteCode(String code)
 
 void TeensyCNCCore::report_state()
 {
-  /* byte buffer[64];
+   byte buffer[64];
     int CommandCode = 65280;
 
     int startingByte = 0;
@@ -130,12 +130,12 @@ void TeensyCNCCore::report_state()
     }
     Serial.println("");
     #endif
-    RawHID.send(buffer, 100);*/
+    RawHID.send(buffer, 100);
 }
 
 void TeensyCNCCore::report_speeds()
 {
-  /* byte buffer[64];
+   /*byte buffer[64];
     int CommandCode = 65281;
 
     int startingByte = 0;
@@ -169,7 +169,15 @@ void TeensyCNCCore::report_speeds()
 
 void TeensyCNCCore::report_positions()
 {
-  /*byte buffer[64];
+/*if(global_state.cnc_position.x_steps > 0 || global_state.cnc_position.y_steps > 0 || global_state.cnc_position.z_steps > 0){
+  Serial.print(global_state.cnc_position.x_steps);
+  Serial.print(" ");
+  Serial.print(global_state.cnc_position.y_steps);
+  Serial.print(" ");
+  Serial.print(global_state.cnc_position.z_steps);
+  Serial.println();
+}*/
+  byte buffer[64];
     int CommandCode = 65282;
 
     int startingByte = 0;
@@ -208,5 +216,5 @@ void TeensyCNCCore::report_positions()
     buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 16) & 0xFF;
     buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 24) & 0xFF;
 
-    RawHID.send(buffer, 100);*/
+    RawHID.send(buffer, 100);
 }

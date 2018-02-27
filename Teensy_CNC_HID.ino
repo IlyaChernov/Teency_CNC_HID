@@ -108,6 +108,7 @@ void receiveCommand()
   int n = RawHID.recv(buffer, 0); // 0 timeout = do not wait
 
   if (n > 0) {
+   // Serial.println(n);
     cncore.global_state.USBCMDqueue.enqueue(buffer);
 
 #ifdef DEBUG
@@ -152,7 +153,7 @@ void loop()
     cncore.global_state.cnc_position.setDestinations(positionsArray);
 
     steppers.moveTo(positionsArray);
-
+    //Serial.println("Ret");
     return;
   }
 
@@ -166,8 +167,10 @@ void loop()
     cncore.report_positions();
   }
 
+  //Serial.println(stepperX.distanceToGo() + stepperY.distanceToGo() + stepperZ.distanceToGo());
   if (!cncore.global_state.ImmediateUSBCMDqueue.isEmpty())
   {
+    //Serial.println("Process 1");
     processBuffer(cncore.global_state.ImmediateUSBCMDqueue.dequeue());
     stepperX.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
     stepperY.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
@@ -177,6 +180,7 @@ void loop()
   }
   else if (!cncore.global_state.USBCMDqueue.isEmpty() && AllDestinationsReached() && cncore.global_state.cnc_status.engine_state == Running)
   {
+    //Serial.println("Process 2");
     processBuffer(cncore.global_state.USBCMDqueue.dequeue());
     stepperX.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
     stepperY.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
@@ -185,12 +189,10 @@ void loop()
     steppers.moveTo(positionsArray);
   }
 
-
-
   steppers.run();
 }
 
 bool AllDestinationsReached()
 {
-  return !( stepperX.isRunning() && stepperY.isRunning() && stepperZ.isRunning() );
+  return ( stepperX.distanceToGo() + stepperY.distanceToGo() + stepperZ.distanceToGo() == 0 );
 }
