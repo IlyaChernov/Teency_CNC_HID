@@ -11,11 +11,13 @@
 
 class TeensyCNCCore
 {
-  private:
-    double xToSteps(double distance);
-    double yToSteps(double distance);
-    double zToSteps(double distance);
   public:
+    static long long xToSteps(float  distance);
+    static long long yToSteps(float  distance);
+    static long long zToSteps(float  distance);
+    static float xToUnits(long long distance);
+    static float yToUnits(long long distance);
+    static float zToUnits(long long distance);
     void report_state();
     void report_speeds();
     void report_positions();

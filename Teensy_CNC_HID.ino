@@ -60,7 +60,7 @@ AccelStepper stepperZ(AccelStepper::DRIVER, zStep, zDirr);
 
 MultiStepper steppers;
 
-unsigned int msBetweenReports = 1000;
+unsigned int msBetweenReports = 500;
 unsigned int msBetweenReportsMoving = 50;
 
 // RawHID packets are always 64 bytes

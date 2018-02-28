@@ -13,9 +13,9 @@ struct Destination
 {
   public :
     int movement_speed;
-    int x_destination_steps;
-    int y_destination_steps;
-    int z_destination_steps;
+    long  x_destination_steps;
+    long  y_destination_steps;
+    long  z_destination_steps;
 };
 
 struct Speeds
@@ -31,14 +31,14 @@ struct Speeds
 struct Position
 {
   public:
-    int x_steps;
-    int y_steps;
-    int z_steps;
+    long  x_steps;
+    long  y_steps;
+    long  z_steps;
 
-    int x_destination_steps;
-    int y_destination_steps;
-    int z_destination_steps;
-
+    long  x_destination_steps;
+    long  y_destination_steps;
+    long  z_destination_steps;
+  
     void setPositions(long absolute[])
     {
       int i = 0;

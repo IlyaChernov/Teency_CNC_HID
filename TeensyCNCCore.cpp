@@ -19,19 +19,34 @@
 #define yRevolutionDistance 4
 #define zRevolutionDistance 4
 
-double TeensyCNCCore::xToSteps(double distance)
+long long TeensyCNCCore::xToSteps(float  distance)
 {
-  return distance / ((double)xRevolutionDistance / (double)xRevolutionSteps);
+  return distance / ((float )xRevolutionDistance / (float )xRevolutionSteps);
 }
 
-double TeensyCNCCore::yToSteps(double distance)
+long long TeensyCNCCore::yToSteps(float  distance)
 {
-  return distance / ((double)yRevolutionDistance / (double)yRevolutionSteps);
+  return distance / ((float )yRevolutionDistance / (float )yRevolutionSteps);
 }
 
-double TeensyCNCCore::zToSteps(double distance)
+long long TeensyCNCCore::zToSteps(float  distance)
 {
-  return distance / ((double)zRevolutionDistance / (double)zRevolutionSteps);
+  return distance / ((float )zRevolutionDistance / (float )zRevolutionSteps);
+}
+
+float  TeensyCNCCore::xToUnits(long long distance)
+{
+  return distance * ((float )xRevolutionDistance / (float )xRevolutionSteps);
+}
+
+float  TeensyCNCCore::yToUnits(long long distance)
+{
+  return distance * ((float )yRevolutionDistance / (float )yRevolutionSteps);
+}
+
+float  TeensyCNCCore::zToUnits(long long distance)
+{
+  return distance * ((float )zRevolutionDistance / (float )zRevolutionSteps);
 }
 
 void TeensyCNCCore::ProcessGCodeFrame(char* frame)
