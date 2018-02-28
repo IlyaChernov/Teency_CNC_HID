@@ -9,15 +9,6 @@
 #include "src/QueueArray/QueueArray.h"
 #include "Enum.h"
 
-struct Destination
-{
-  public :
-    int movement_speed;
-    long  x_destination_steps;
-    long  y_destination_steps;
-    long  z_destination_steps;
-};
-
 struct Speeds
 {
   public:
@@ -78,9 +69,9 @@ class CNCGlobalState
     Position cnc_position;
     Status cnc_status;
     Speeds cnc_speeds;
-    QueueArray <byte*> USBCMDqueue;
+    //QueueArray <byte*> USBCMDqueue;
+    String USBCMDqueueSTR;
     QueueArray <byte*> ImmediateUSBCMDqueue;
-    QueueArray <Destination> Destinations;
 };
 
 #endif

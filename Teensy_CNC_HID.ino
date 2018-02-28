@@ -108,14 +108,27 @@ void receiveCommand()
   int n = RawHID.recv(buffer, 0); // 0 timeout = do not wait
 
   if (n > 0) {
-   // Serial.println(n);
-    cncore.global_state.USBCMDqueue.enqueue(buffer);
+    cncore.global_state.USBCMDqueueSTR.concat((char*)buffer);
+    cncore.global_state.USBCMDqueueSTR.concat('|');
+    // Serial.println(n);
+//    cncore.global_state.USBCMDqueue.enqueue(buffer);
+    immediate_report_state();
+    
+Serial.println("Queue contents - ");
+   Serial.println(cncore.global_state.USBCMDqueueSTR);
+    /*Serial.println("Queue contents - ");
+    for (int i = 0; i < cncore.global_state.USBCMDqueue.count(); i++)
+    {
+      Serial.print(i);
+      Serial.print(" - ");
+      Serial.println((char*)cncore.global_state.USBCMDqueue.contents[i]);
+    }*/
 
 #ifdef DEBUG
     Serial.print("Incoming cmd - ");
     Serial.println((char*)buffer);
-    Serial.print("Queue count - ");
-    Serial.println(cncore.global_state.USBCMDqueue.count());
+    /*Serial.print("Queue count - ");
+    Serial.println(cncore.global_state.USBCMDqueue.count());*/
     Serial.print("CNC Engine State - ");
     Serial.println(cncore.global_state.cnc_status.engine_state);
 #endif
@@ -134,20 +147,38 @@ void ExecuteCode (const char * match, const unsigned int length, char * & replac
 
 void processBuffer(byte* buf)
 {
+#ifdef DEBUG
+  Serial.print("Preprocessing frame - ");
+  Serial.println((char*)buf);
+
+  Serial.println("Queue contents - ");
+   Serial.println(cncore.global_state.USBCMDqueueSTR);
+  //for (int i = 0; i < cncore.global_state.USBCMDqueue.count(); i++)
+  //{
+  //  Serial.print(i);
+  //  Serial.print(" - ");
+  //  Serial.println((char*)cncore.global_state.USBCMDqueue.contents[i]);
+  //}
+#endif
   cncore.ProcessGCodeFrame((char*)buf);
+}
+
+void immediate_report_state()
+{
+  msUntilStatusReport = 0;
+  cncore.report_state();
 }
 
 void loop()
 {
-  if (((cncore.global_state.USBCMDqueue.isEmpty() || cncore.global_state.cnc_status.engine_state != Running) &&  msUntilStatusReport > msBetweenReports) || msUntilStatusReport > msBetweenReports) {
-    msUntilStatusReport = 0;
-    cncore.report_state();
+  if (((/*cncore.global_state.USBCMDqueue.isEmpty() ||*/ cncore.global_state.cnc_status.engine_state != Running) &&  msUntilStatusReport > msBetweenReports) || msUntilStatusReport > msBetweenReports) {
+    immediate_report_state();
   }
 
   long positionsArray[] = {XPos(), YPos(), ZPos()};
 
   if (cncore.global_state.cnc_status.engine_state == EmergencyStop) {
-    cncore.global_state.USBCMDqueue = QueueArray <byte*>();
+    //cncore.global_state.USBCMDqueue = QueueArray <byte*>();
     cncore.global_state.ImmediateUSBCMDqueue = QueueArray <byte*>();
 
     cncore.global_state.cnc_position.setDestinations(positionsArray);
@@ -171,17 +202,21 @@ void loop()
   if (!cncore.global_state.ImmediateUSBCMDqueue.isEmpty())
   {
     //Serial.println("Process 1");
-    processBuffer(cncore.global_state.ImmediateUSBCMDqueue.dequeue());
+    //processBuffer(cncore.global_state.ImmediateUSBCMDqueue.dequeue());
     stepperX.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
     stepperY.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
     stepperZ.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
     long positionsArray[] = {cncore.global_state.cnc_position.x_destination_steps, cncore.global_state.cnc_position.y_destination_steps, cncore.global_state.cnc_position.z_destination_steps};
     steppers.moveTo(positionsArray);
   }
-  else if (!cncore.global_state.USBCMDqueue.isEmpty() && AllDestinationsReached() && cncore.global_state.cnc_status.engine_state == Running)
+  else if (/*!cncore.global_state.USBCMDqueue.isEmpty() &&*/cncore.global_state.USBCMDqueueSTR.length()>0 && AllDestinationsReached() && cncore.global_state.cnc_status.engine_state == Running)
   {
     //Serial.println("Process 2");
-    processBuffer(cncore.global_state.USBCMDqueue.dequeue());
+    //processBuffer(cncore.global_state.USBCMDqueue.dequeue());
+    byte buf[64];
+    cncore.global_state.USBCMDqueueSTR.getBytes(buf, cncore.global_state.USBCMDqueueSTR.indexOf('|'));
+    cncore.global_state.USBCMDqueueSTR.remove(0, cncore.global_state.USBCMDqueueSTR.indexOf('|')+1);
+    processBuffer(buf);
     stepperX.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
     stepperY.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
     stepperZ.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);

@@ -125,10 +125,15 @@ void TeensyCNCCore::report_state()
     buffer[startingByte++] = (global_state.cnc_status.line_number >> 16) & 0xFF;
     buffer[startingByte++] = (global_state.cnc_status.line_number >> 24) & 0xFF;
 
-    buffer[startingByte++] = (global_state.USBCMDqueue.count() >> 0) & 0xFF;
+    /*buffer[startingByte++] = (global_state.USBCMDqueue.count() >> 0) & 0xFF;
     buffer[startingByte++] = (global_state.USBCMDqueue.count() >> 8) & 0xFF;
     buffer[startingByte++] = (global_state.USBCMDqueue.count() >> 16) & 0xFF;
-    buffer[startingByte++] = (global_state.USBCMDqueue.count() >> 24) & 0xFF;
+    buffer[startingByte++] = (global_state.USBCMDqueue.count() >> 24) & 0xFF;*/
+
+     buffer[startingByte++] = (0 >> 0) & 0xFF;
+    buffer[startingByte++] = (0 >> 8) & 0xFF;
+    buffer[startingByte++] = (0 >> 16) & 0xFF;
+    buffer[startingByte++] = (0 >> 24) & 0xFF;
 
     buffer[startingByte++] = (global_state.cnc_status.engine_state >> 0) & 0xFF;
     buffer[startingByte++] = (global_state.cnc_status.engine_state >> 8) & 0xFF;
