@@ -97,6 +97,15 @@ void TeensyCNCCore::ExecuteCode(String code)
         break;
     }
   }
+  else if (code.startsWith("m"))
+  {
+    switch (code.remove(0, 1).toInt())
+    {
+      case 0:
+        global_state.cnc_status.engine_state = Paused;
+        break;
+    }
+  }
   else if (code.startsWith("f"))
   {
     global_state.PositioningSpeeds[global_state.curPosType] = code.toInt();
