@@ -74,7 +74,7 @@ void TeensyCNCCore::ExecuteCode(String code)
   Serial.println (" code");
 
   if (code.startsWith("g"))
-  {    
+  {
     switch (code.remove(0, 1).toInt())
     {
       case 0:
@@ -89,6 +89,12 @@ void TeensyCNCCore::ExecuteCode(String code)
       case 3:
         global_state.curPosType = G03;
         break;
+      case 90:
+        global_state.curCoordSysType = Absolute;
+        break;
+      case 91:
+        global_state.curCoordSysType = Incremental;
+        break;
     }
   }
   else if (code.startsWith("f"))
@@ -97,65 +103,68 @@ void TeensyCNCCore::ExecuteCode(String code)
   }
   else if (code.startsWith("x"))
   {
-    global_state.cnc_position.x_destination_steps = xToSteps(code.remove(0, 1).replace(",", ".").toFloat());
+    float value = xToSteps(code.remove(0, 1).replace(",", ".").toFloat());
+    global_state.cnc_position.x_destination_steps = global_state.curCoordSysType == Absolute ? value : (global_state.cnc_position.x_destination_steps + value) ;
   }
   else if (code.startsWith("y"))
   {
-    global_state.cnc_position.y_destination_steps = yToSteps(code.remove(0, 1).replace(",", ".").toFloat());
+    float value = yToSteps(code.remove(0, 1).replace(",", ".").toFloat());
+    global_state.cnc_position.y_destination_steps = global_state.curCoordSysType == Absolute ? value : (global_state.cnc_position.y_destination_steps + value) ;
   }
   else if (code.startsWith("z"))
   {
-    global_state.cnc_position.z_destination_steps = zToSteps(code.remove(0, 1).replace(",", ".").toFloat());
+    float value = zToSteps(code.remove(0, 1).replace(",", ".").toFloat());
+    global_state.cnc_position.z_destination_steps = global_state.curCoordSysType == Absolute ? value : (global_state.cnc_position.z_destination_steps + value) ;
   }
 }
 
 void TeensyCNCCore::report_state()
 {
-   byte buffer[64];
-    int CommandCode = 65280;
+  byte buffer[64];
+  int CommandCode = 65280;
 
-    int startingByte = 0;
-    buffer[startingByte++] = (CommandCode >> 0) & 0xFF;
-    buffer[startingByte++] = (CommandCode >> 8) & 0xFF;
-    buffer[startingByte++] = (CommandCode >> 16) & 0xFF;
-    buffer[startingByte++] = (CommandCode >> 24) & 0xFF;
+  int startingByte = 0;
+  buffer[startingByte++] = (CommandCode >> 0) & 0xFF;
+  buffer[startingByte++] = (CommandCode >> 8) & 0xFF;
+  buffer[startingByte++] = (CommandCode >> 16) & 0xFF;
+  buffer[startingByte++] = (CommandCode >> 24) & 0xFF;
 
-    buffer[startingByte++] = (global_state.cnc_status.line_number >> 0) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_status.line_number >> 8) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_status.line_number >> 16) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_status.line_number >> 24) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_status.line_number >> 0) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_status.line_number >> 8) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_status.line_number >> 16) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_status.line_number >> 24) & 0xFF;
 
-    /*buffer[startingByte++] = (global_state.USBCMDqueue.count() >> 0) & 0xFF;
+  /*buffer[startingByte++] = (global_state.USBCMDqueue.count() >> 0) & 0xFF;
     buffer[startingByte++] = (global_state.USBCMDqueue.count() >> 8) & 0xFF;
     buffer[startingByte++] = (global_state.USBCMDqueue.count() >> 16) & 0xFF;
     buffer[startingByte++] = (global_state.USBCMDqueue.count() >> 24) & 0xFF;*/
 
-     buffer[startingByte++] = (0 >> 0) & 0xFF;
-    buffer[startingByte++] = (0 >> 8) & 0xFF;
-    buffer[startingByte++] = (0 >> 16) & 0xFF;
-    buffer[startingByte++] = (0 >> 24) & 0xFF;
+  buffer[startingByte++] = (global_state.USBCMDqueueSTR.length() >> 0) & 0xFF;
+  buffer[startingByte++] = (global_state.USBCMDqueueSTR.length() >> 8) & 0xFF;
+  buffer[startingByte++] = (global_state.USBCMDqueueSTR.length() >> 16) & 0xFF;
+  buffer[startingByte++] = (global_state.USBCMDqueueSTR.length() >> 24) & 0xFF;
 
-    buffer[startingByte++] = (global_state.cnc_status.engine_state >> 0) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_status.engine_state >> 8) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_status.engine_state >> 16) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_status.engine_state >> 24) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_status.engine_state >> 0) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_status.engine_state >> 8) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_status.engine_state >> 16) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_status.engine_state >> 24) & 0xFF;
 
-    #ifdef DEBUGReports
-    Serial.print("Report Buffer Count " + String(global_state.USBCMDqueue.count()) + " | ");
-    for (int i = 0; i < 64; i++) {
-     if (i % 4 == 0 && i > 0)
-       Serial.print("  ");
-     Serial.print(buffer[i]);
-     Serial.print(" ");
-    }
-    Serial.println("");
-    #endif
-    RawHID.send(buffer, 100);
+#ifdef DEBUGReports
+  Serial.print("Report Buffer Count " + String(global_state.USBCMDqueue.count()) + " | ");
+  for (int i = 0; i < 64; i++) {
+    if (i % 4 == 0 && i > 0)
+      Serial.print("  ");
+    Serial.print(buffer[i]);
+    Serial.print(" ");
+  }
+  Serial.println("");
+#endif
+  RawHID.send(buffer, 100);
 }
 
 void TeensyCNCCore::report_speeds()
 {
-   /*byte buffer[64];
+  /*byte buffer[64];
     int CommandCode = 65281;
 
     int startingByte = 0;
@@ -189,52 +198,52 @@ void TeensyCNCCore::report_speeds()
 
 void TeensyCNCCore::report_positions()
 {
-/*if(global_state.cnc_position.x_steps > 0 || global_state.cnc_position.y_steps > 0 || global_state.cnc_position.z_steps > 0){
-  Serial.print(global_state.cnc_position.x_steps);
-  Serial.print(" ");
-  Serial.print(global_state.cnc_position.y_steps);
-  Serial.print(" ");
-  Serial.print(global_state.cnc_position.z_steps);
-  Serial.println();
-}*/
+  /*if(global_state.cnc_position.x_steps > 0 || global_state.cnc_position.y_steps > 0 || global_state.cnc_position.z_steps > 0){
+    Serial.print(global_state.cnc_position.x_steps);
+    Serial.print(" ");
+    Serial.print(global_state.cnc_position.y_steps);
+    Serial.print(" ");
+    Serial.print(global_state.cnc_position.z_steps);
+    Serial.println();
+    }*/
   byte buffer[64];
-    int CommandCode = 65282;
+  int CommandCode = 65282;
 
-    int startingByte = 0;
-    buffer[startingByte++] = (CommandCode >> 0) & 0xFF;
-    buffer[startingByte++] = (CommandCode >> 8) & 0xFF;
-    buffer[startingByte++] = (CommandCode >> 16) & 0xFF;
-    buffer[startingByte++] = (CommandCode >> 24) & 0xFF;
+  int startingByte = 0;
+  buffer[startingByte++] = (CommandCode >> 0) & 0xFF;
+  buffer[startingByte++] = (CommandCode >> 8) & 0xFF;
+  buffer[startingByte++] = (CommandCode >> 16) & 0xFF;
+  buffer[startingByte++] = (CommandCode >> 24) & 0xFF;
 
-    buffer[startingByte++] = (global_state.cnc_position.x_steps >> 0) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.x_steps >> 8) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.x_steps >> 16) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.x_steps >> 24) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.x_steps >> 0) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.x_steps >> 8) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.x_steps >> 16) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.x_steps >> 24) & 0xFF;
 
-    buffer[startingByte++] = (global_state.cnc_position.y_steps >> 0) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.y_steps >> 8) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.y_steps >> 16) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.y_steps >> 24) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.y_steps >> 0) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.y_steps >> 8) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.y_steps >> 16) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.y_steps >> 24) & 0xFF;
 
-    buffer[startingByte++] = (global_state.cnc_position.z_steps >> 0) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.z_steps >> 8) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.z_steps >> 16) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.z_steps >> 24) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.z_steps >> 0) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.z_steps >> 8) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.z_steps >> 16) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.z_steps >> 24) & 0xFF;
 
-    buffer[startingByte++] = (global_state.cnc_position.x_destination_steps >> 0) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.x_destination_steps >> 8) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.x_destination_steps >> 16) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.x_destination_steps >> 24) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.x_destination_steps >> 0) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.x_destination_steps >> 8) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.x_destination_steps >> 16) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.x_destination_steps >> 24) & 0xFF;
 
-    buffer[startingByte++] = (global_state.cnc_position.y_destination_steps >> 0) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.y_destination_steps >> 8) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.y_destination_steps >> 16) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.y_destination_steps >> 24) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.y_destination_steps >> 0) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.y_destination_steps >> 8) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.y_destination_steps >> 16) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.y_destination_steps >> 24) & 0xFF;
 
-    buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 0) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 8) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 16) & 0xFF;
-    buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 24) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 0) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 8) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 16) & 0xFF;
+  buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 24) & 0xFF;
 
-    RawHID.send(buffer, 100);
+  RawHID.send(buffer, 100);
 }
