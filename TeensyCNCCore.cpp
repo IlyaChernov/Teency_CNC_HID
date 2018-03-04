@@ -108,7 +108,9 @@ void TeensyCNCCore::ExecuteCode(String code)
   }
   else if (code.startsWith("f"))
   {
-    global_state.PositioningSpeeds[global_state.curPosType] = code.toInt();
+    global_state.cnc_speeds.movement_speed = code.remove(0, 1).toInt();
+    global_state.PositioningSpeeds[global_state.curPosType] = global_state.cnc_speeds.movement_speed;
+
   }
   else if (code.startsWith("x"))
   {

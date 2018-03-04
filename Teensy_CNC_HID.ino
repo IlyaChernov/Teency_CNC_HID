@@ -81,9 +81,9 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(s3_pin), start_continue, FALLING );
 #endif
 
-  stepperX.setMaxSpeed(2000);
-  stepperY.setMaxSpeed(2000);
-  stepperZ.setMaxSpeed(2000);
+  stepperX.setMaxSpeed(200);
+  stepperY.setMaxSpeed(200);
+  stepperZ.setMaxSpeed(200);
 
   steppers.addStepper(stepperX);
   steppers.addStepper(stepperY);
@@ -207,6 +207,8 @@ void loop()
     stepperX.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
     stepperY.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
     stepperZ.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
+    Serial.print("Speed : ");
+    Serial.println(cncore.global_state.cnc_speeds.movement_speed);
     long positionsArray[] = {cncore.global_state.cnc_position.x_destination_steps, cncore.global_state.cnc_position.y_destination_steps, cncore.global_state.cnc_position.z_destination_steps};
     steppers.moveTo(positionsArray);
   }
