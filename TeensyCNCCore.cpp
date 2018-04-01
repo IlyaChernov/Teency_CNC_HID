@@ -13,8 +13,9 @@
 
 #define xRevolutionSteps 400
 #define yRevolutionSteps 400
-#define zRevolutionSteps 400
+#define zRevolutionSteps 2000
 
+//distance in mm
 #define xRevolutionDistance 4
 #define yRevolutionDistance 4
 #define zRevolutionDistance 4
@@ -218,43 +219,67 @@ void TeensyCNCCore::report_positions()
     Serial.println();
     }*/
   byte buffer[64];
-  int CommandCode = 65282;
 
   int startingByte = 0;
-  buffer[startingByte++] = (CommandCode >> 0) & 0xFF;
-  buffer[startingByte++] = (CommandCode >> 8) & 0xFF;
-  buffer[startingByte++] = (CommandCode >> 16) & 0xFF;
-  buffer[startingByte++] = (CommandCode >> 24) & 0xFF;
 
-  buffer[startingByte++] = (global_state.cnc_position.x_steps >> 0) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.x_steps >> 8) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.x_steps >> 16) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.x_steps >> 24) & 0xFF;
+  int CommandCode = 65282;
 
-  buffer[startingByte++] = (global_state.cnc_position.y_steps >> 0) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.y_steps >> 8) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.y_steps >> 16) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.y_steps >> 24) & 0xFF;
+  byte *b = (byte *)&CommandCode;
 
-  buffer[startingByte++] = (global_state.cnc_position.z_steps >> 0) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.z_steps >> 8) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.z_steps >> 16) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.z_steps >> 24) & 0xFF;
+  buffer[startingByte++] = (b[0]) & 0xFF;
+  buffer[startingByte++] = (b[1]) & 0xFF;
+  buffer[startingByte++] = (b[2]) & 0xFF;
+  buffer[startingByte++] = (b[3]) & 0xFF;
 
-  buffer[startingByte++] = (global_state.cnc_position.x_destination_steps >> 0) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.x_destination_steps >> 8) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.x_destination_steps >> 16) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.x_destination_steps >> 24) & 0xFF;
+  float xunits = xToUnits(global_state.cnc_position.x_steps);
+  float yunits = yToUnits(global_state.cnc_position.y_steps);
+  float zunits = zToUnits(global_state.cnc_position.z_steps);
 
-  buffer[startingByte++] = (global_state.cnc_position.y_destination_steps >> 0) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.y_destination_steps >> 8) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.y_destination_steps >> 16) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.y_destination_steps >> 24) & 0xFF;
+  b = (byte *)&xunits;
 
-  buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 0) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 8) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 16) & 0xFF;
-  buffer[startingByte++] = (global_state.cnc_position.z_destination_steps >> 24) & 0xFF;
+  buffer[startingByte++] = (b[0]) & 0xFF;
+  buffer[startingByte++] = (b[1]) & 0xFF;
+  buffer[startingByte++] = (b[2]) & 0xFF;
+  buffer[startingByte++] = (b[3]) & 0xFF;
+
+  b = (byte *)&yunits;
+
+  buffer[startingByte++] = (b[0]) & 0xFF;
+  buffer[startingByte++] = (b[1]) & 0xFF;
+  buffer[startingByte++] = (b[2]) & 0xFF;
+  buffer[startingByte++] = (b[3]) & 0xFF;
+
+  b = (byte *)&zunits;
+
+  buffer[startingByte++] = (b[0]) & 0xFF;
+  buffer[startingByte++] = (b[1]) & 0xFF;
+  buffer[startingByte++] = (b[2]) & 0xFF;
+  buffer[startingByte++] = (b[3]) & 0xFF;
+
+  xunits = xToUnits(global_state.cnc_position.x_destination_steps);
+  yunits = yToUnits(global_state.cnc_position.y_destination_steps);
+  zunits = zToUnits(global_state.cnc_position.z_destination_steps);
+
+  b = (byte *)&xunits;
+
+  buffer[startingByte++] = (b[0]) & 0xFF;
+  buffer[startingByte++] = (b[1]) & 0xFF;
+  buffer[startingByte++] = (b[2]) & 0xFF;
+  buffer[startingByte++] = (b[3]) & 0xFF;
+
+  b = (byte *)&yunits;
+
+  buffer[startingByte++] = (b[0]) & 0xFF;
+  buffer[startingByte++] = (b[1]) & 0xFF;
+  buffer[startingByte++] = (b[2]) & 0xFF;
+  buffer[startingByte++] = (b[3]) & 0xFF;
+
+  b = (byte *)&zunits;
+
+  buffer[startingByte++] = (b[0]) & 0xFF;
+  buffer[startingByte++] = (b[1]) & 0xFF;
+  buffer[startingByte++] = (b[2]) & 0xFF;
+  buffer[startingByte++] = (b[3]) & 0xFF;
 
   RawHID.send(buffer, 100);
 }

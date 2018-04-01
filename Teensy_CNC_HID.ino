@@ -195,7 +195,7 @@ void loop()
   {
     stepperX.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
     stepperY.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
-    stepperZ.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
+    stepperZ.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed*5);
     long positionsArray[] = {cncore.global_state.cnc_position.x_destination_steps, cncore.global_state.cnc_position.y_destination_steps, cncore.global_state.cnc_position.z_destination_steps};
     steppers.moveTo(positionsArray);
   }
@@ -206,7 +206,7 @@ void loop()
     processBuffer(buf);
     stepperX.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
     stepperY.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
-    stepperZ.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
+    stepperZ.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed*5);
     Serial.print("Speed : ");
     Serial.println(cncore.global_state.cnc_speeds.movement_speed);
     long positionsArray[] = {cncore.global_state.cnc_position.x_destination_steps, cncore.global_state.cnc_position.y_destination_steps, cncore.global_state.cnc_position.z_destination_steps};
