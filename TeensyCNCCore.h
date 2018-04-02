@@ -17,7 +17,7 @@ class TeensyCNCCore
     static long long zToSteps(float  distance);
     static float xToUnits(long long distance);
     static float yToUnits(long long distance);
-    static float zToUnits(long long distance);
+    static float zToUnits(long long distance);    
     void report_state();
     void report_speeds();
     void report_positions();

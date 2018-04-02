@@ -81,9 +81,9 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(s3_pin), start_continue, FALLING );
 #endif
 
-  stepperX.setMaxSpeed(200);
-  stepperY.setMaxSpeed(200);
-  stepperZ.setMaxSpeed(200);
+  stepperX.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
+  stepperY.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
+  stepperZ.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
 
   steppers.addStepper(stepperX);
   steppers.addStepper(stepperY);
@@ -110,7 +110,7 @@ void receiveCommand()
   if (n > 0) {
     cncore.global_state.USBCMDqueueSTR.concat((char*)buffer);
     cncore.global_state.USBCMDqueueSTR.concat('|');
-      
+
     immediate_report_state();
 
     Serial.println("Queue contents - ");
@@ -193,9 +193,14 @@ void loop()
 
   if (!cncore.global_state.ImmediateUSBCMDqueue.isEmpty())
   {
-    stepperX.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
-    stepperY.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
-    stepperZ.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed*5);
+    float speedPerSec = cncore.global_state.cnc_speeds.movement_speed / 60;
+
+    cncore.global_state.cnc_position.getXPathRelation();
+
+    stepperX.setMaxSpeed(cncore.xToSteps(speedPerSec) * cncore.global_state.cnc_position.getXPathRelation());
+    stepperY.setMaxSpeed(cncore.yToSteps(speedPerSec) * cncore.global_state.cnc_position.getYPathRelation());
+    stepperZ.setMaxSpeed(cncore.zToSteps(speedPerSec) * cncore.global_state.cnc_position.getZPathRelation());
+
     long positionsArray[] = {cncore.global_state.cnc_position.x_destination_steps, cncore.global_state.cnc_position.y_destination_steps, cncore.global_state.cnc_position.z_destination_steps};
     steppers.moveTo(positionsArray);
   }
@@ -204,11 +209,13 @@ void loop()
     byte buf[64];
     GetCommandFromBuffer(buf);
     processBuffer(buf);
-    stepperX.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
-    stepperY.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed);
-    stepperZ.setMaxSpeed(cncore.global_state.cnc_speeds.movement_speed*5);
-    Serial.print("Speed : ");
-    Serial.println(cncore.global_state.cnc_speeds.movement_speed);
+
+    float speedPerSec = cncore.global_state.cnc_speeds.movement_speed / 60;
+
+    stepperX.setMaxSpeed(cncore.xToSteps(speedPerSec) * cncore.global_state.cnc_position.getXPathRelation());
+    stepperY.setMaxSpeed(cncore.yToSteps(speedPerSec) * cncore.global_state.cnc_position.getYPathRelation());
+    stepperZ.setMaxSpeed(cncore.zToSteps(speedPerSec) * cncore.global_state.cnc_position.getZPathRelation());
+
     long positionsArray[] = {cncore.global_state.cnc_position.x_destination_steps, cncore.global_state.cnc_position.y_destination_steps, cncore.global_state.cnc_position.z_destination_steps};
     steppers.moveTo(positionsArray);
   }
@@ -220,7 +227,7 @@ void GetCommandFromBuffer(byte *buf)
 {
   int comlen = cncore.global_state.USBCMDqueueSTR.indexOf('|');
   if (comlen != -1) {
-    cncore.global_state.USBCMDqueueSTR.getBytes(buf, cncore.global_state.USBCMDqueueSTR.indexOf('|'));
+    cncore.global_state.USBCMDqueueSTR.getBytes(buf, cncore.global_state.USBCMDqueueSTR.indexOf('|') + 1);
     cncore.global_state.USBCMDqueueSTR.remove(0, cncore.global_state.USBCMDqueueSTR.indexOf('|') + 1);
   }
   else
