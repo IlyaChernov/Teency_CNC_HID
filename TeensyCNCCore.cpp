@@ -105,6 +105,9 @@ void TeensyCNCCore::ExecuteCode(String code)
       case 0:
         global_state.cnc_status.engine_state = Paused;
         break;
+      case 84:
+        
+        break;
     }
   }
   else if (code.startsWith("f"))
