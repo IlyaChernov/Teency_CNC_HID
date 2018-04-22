@@ -9,6 +9,7 @@
 class CNCAxis
 {
   public:
+    CNCAxis();
     CNCAxis(int encoderPinA, int encoderPinB, int pinDir, int pinStep, int pinEndstop, int pinEnable);
     void StepForward(AccelStepper *);
     void StepBackward(AccelStepper *);

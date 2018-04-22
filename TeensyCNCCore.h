@@ -26,7 +26,9 @@ class TeensyCNCCore
     void report_positions();
     
     CNCGlobalState global_state;
-    //CNCAxis CNCAxisX( xEncA, xEncB, xDirr, xStep, xEnds, xEnbl);
+    CNCAxis AxisX;
+    CNCAxis AxisY;
+    CNCAxis AxisZ;
     
     void ProcessGCodeFrame(char* frame);
     void ExecuteCode (String code);

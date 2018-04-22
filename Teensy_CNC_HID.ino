@@ -46,6 +46,9 @@ elapsedMillis msUntilStatusReport;
 void setup() {
   Serial.begin(9600);
   cncore.ExecuteCallBack = ExecuteCode;
+  cncore.AxisX = CNCAxis( xEncA, xEncB, xDirr, xStep, xEnds, xEnbl);
+  cncore.AxisY = CNCAxis( yEncA, yEncB, yDirr, yStep, yEnds, yEnbl);
+  cncore.AxisZ = CNCAxis( zEncA, zEncB, zDirr, zStep, zEnds, zEnbl);
 
 #ifdef useButtons
   pinMode(s1_pin, INPUT);

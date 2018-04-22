@@ -1,4 +1,8 @@
 #include "CNCAxis.h"
+
+CNCAxis::CNCAxis()
+{}
+
 CNCAxis::CNCAxis(int encoderPinA, int encoderPinB, int pinDir, int pinStep, int pinEndstop, int pinEnable)
 {
   _pinDir = pinDir;

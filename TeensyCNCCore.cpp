@@ -106,7 +106,9 @@ void TeensyCNCCore::ExecuteCode(String code)
         global_state.cnc_status.engine_state = Paused;
         break;
       case 84:
-        
+        AxisX.Disable();
+        AxisY.Disable();
+        AxisZ.Disable();
         break;
     }
   }
